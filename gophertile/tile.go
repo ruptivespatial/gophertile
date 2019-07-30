@@ -7,10 +7,16 @@ import (
 const threeSixty float64 = 360.0
 const oneEighty float64 = 180.0
 const radius float64 = 6378137.0
+const d2r float64 = math.Pi / 180
+const r2d = 180 / math.Pi
 
 //Tile struct is the main object we deal with, represents a standard X/Y/Z tile
 type Tile struct {
 	X, Y, Z int
+}
+type tileFraction struct {
+	X, Y float64
+	Z    int
 }
 
 //LngLat holds a standard geographic coordinate pair in decimal degrees
@@ -120,4 +126,56 @@ func ToXY(ll *LngLat) *XY {
 	y := radius * math.Log(math.Tan(intrx))
 
 	return &XY{x, y}
+}
+//BboxToTile returns the smallest tile which will fit the entire bounding box
+func BboxToTile(box *LngLatBbox) *Tile {
+
+	min := PointToTile(&LngLat{box.West, box.South}, 32)
+	max := PointToTile(&LngLat{box.East, box.North}, 32)
+
+	tilePoints := []int{min.X, min.Y, max.X, max.Y}
+	z := getBBoxZoom(tilePoints)
+	if z == 0 {
+		return &Tile{0, 0, 0}
+	}
+	x := tilePoints[0] >> uint(32-z)
+	y := tilePoints[1] >> uint(32-z)
+	return &Tile{X: x, Y: y, Z: z}
+}
+//getBBoxZoom returns the lowest zoom level that will constrain the provided tile numbers
+func getBBoxZoom(tc []int) int {
+
+	maxZoom := 28
+	for z := 0; z < maxZoom; z++ {
+		mask := 1 << uint(32-(z+1))
+		if (tc[0]&mask != tc[2]&mask) || (tc[1]&mask != tc[3]&mask) {
+			return z
+		}
+	}
+	return maxZoom
+
+}
+
+func PointToTile(ll *LngLat, z int) *Tile {
+	tile := PointToFractionalTile(ll, z)
+	return &Tile{X: int(math.Floor(tile.X)),
+		Y: int(math.Floor(tile.Y)),
+		Z: z}
+}
+
+func PointToFractionalTile(ll *LngLat, z int) *tileFraction {
+	sin := math.Sin(ll.Lat * d2r)
+	z2 := math.Pow(2, float64(z))
+	x := z2 * (ll.Lng/360 + 0.5)
+	y := z2 * (0.5 - 0.25*math.Log((1+sin)/(1-sin))/math.Pi)
+
+	// Wrap Tile X
+	x = math.Mod(x, z2)
+
+	if x < 0 {
+		x = x + z2
+	}
+
+	return &tileFraction{X: x, Y: y, Z: z}
+
 }

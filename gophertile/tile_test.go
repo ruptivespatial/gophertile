@@ -99,3 +99,45 @@ func assertEq(t *testing.T, x interface{}, y interface{}) {
 		t.Fail()
 	}
 }
+func TestBboxToTile(t *testing.T) {
+	bbox := LngLatBbox{-77.04615354537964,
+		38.899967510782346,
+		-77.03664779663086,
+		38.90728142481329}
+
+	tile := BboxToTile(&bbox)
+
+	if tile.X != 9371 || tile.Y != 12534 || tile.Z != 15 {
+		t.Logf("tile: %v", tile)
+		t.Fail()
+	}
+
+}
+
+func TestPointToTile(t *testing.T) {
+	ll := LngLat{
+		Lat: 41.26000108568697,
+		Lng: -95.93965530395508,
+	}
+	tile := Tile{X: 119, Y: 191, Z: 9}
+
+	tf := PointToTile(&ll, 9)
+
+	if tile.X != tf.X || tile.Y != tf.Y || tile.Z != tf.Z {
+		t.Fail()
+	}
+
+}
+
+func TestPointToFractionalTile(t *testing.T) {
+	ll := LngLat{
+		Lat: 41.26000108568697,
+		Lng: -95.93965530395508,
+	}
+	tf := tileFraction{X: 119.552490234375, Y: 191.47119140625, Z: 9}
+	tile := PointToFractionalTile(&ll, 9)
+	if tile.X != tf.X || tile.Y != tf.Y || tile.Z != tf.Z {
+		t.Fail()
+	}
+
+}
