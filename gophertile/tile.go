@@ -160,7 +160,7 @@ func getBBoxZoom(tc []int) int {
 
 //PointToTile returns a tile at the giver lat/lng and zoom level
 func PointToTile(ll *LngLat, z int) *Tile {
-	tile := PointToFractionalTile(ll, z)
+	tile := pointToFractionalTile(ll, z)
 	return &Tile{X: int(math.Floor(tile.X)),
 		Y: int(math.Floor(tile.Y)),
 		Z: z}
@@ -168,7 +168,7 @@ func PointToTile(ll *LngLat, z int) *Tile {
 
 //PointToFractionalTile returns a tile for the giver lat/lng and zoom -- however it also returns tile decimals
 //which might not be useful, will perhaps mark this unexported in the furture
-func PointToFractionalTile(ll *LngLat, z int) *tileFraction {
+func pointToFractionalTile(ll *LngLat, z int) *tileFraction {
 	sin := math.Sin(ll.Lat * d2r)
 	z2 := math.Pow(2, float64(z))
 	x := z2 * (ll.Lng/360 + 0.5)

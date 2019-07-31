@@ -135,7 +135,7 @@ func TestPointToFractionalTile(t *testing.T) {
 		Lng: -95.93965530395508,
 	}
 	tf := tileFraction{X: 119.552490234375, Y: 191.47119140625, Z: 9}
-	tile := PointToFractionalTile(&ll, 9)
+	tile := pointToFractionalTile(&ll, 9)
 	if tile.X != tf.X || tile.Y != tf.Y || tile.Z != tf.Z {
 		t.Fail()
 	}
