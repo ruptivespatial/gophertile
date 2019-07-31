@@ -127,6 +127,7 @@ func ToXY(ll *LngLat) *XY {
 
 	return &XY{x, y}
 }
+
 //BboxToTile returns the smallest tile which will fit the entire bounding box
 func BboxToTile(box *LngLatBbox) *Tile {
 
@@ -142,6 +143,7 @@ func BboxToTile(box *LngLatBbox) *Tile {
 	y := tilePoints[1] >> uint(32-z)
 	return &Tile{X: x, Y: y, Z: z}
 }
+
 //getBBoxZoom returns the lowest zoom level that will constrain the provided tile numbers
 func getBBoxZoom(tc []int) int {
 
@@ -156,6 +158,7 @@ func getBBoxZoom(tc []int) int {
 
 }
 
+//PointToTile returns a tile at the giver lat/lng and zoom level
 func PointToTile(ll *LngLat, z int) *Tile {
 	tile := PointToFractionalTile(ll, z)
 	return &Tile{X: int(math.Floor(tile.X)),
@@ -163,6 +166,8 @@ func PointToTile(ll *LngLat, z int) *Tile {
 		Z: z}
 }
 
+//PointToFractionalTile returns a tile for the giver lat/lng and zoom -- however it also returns tile decimals
+//which might not be useful, will perhaps mark this unexported in the furture
 func PointToFractionalTile(ll *LngLat, z int) *tileFraction {
 	sin := math.Sin(ll.Lat * d2r)
 	z2 := math.Pow(2, float64(z))
