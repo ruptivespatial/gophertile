@@ -4,6 +4,7 @@ import (
 	"math"
 )
 
+//for 4326
 const threeSixty float64 = 360.0
 const oneEighty float64 = 180.0
 const radius float64 = 6378137.0
@@ -65,7 +66,7 @@ func (tile *Tile) Equals(t2 *Tile) bool {
 
 }
 
-//Ul returns the upper left corner of the tile decimal degrees
+//Ul returns the upper left corner of the tile in decimal degrees
 func (tile *Tile) Ul() *LngLat {
 
 	n := math.Pow(2.0, float64(tile.Z))
@@ -76,6 +77,18 @@ func (tile *Tile) Ul() *LngLat {
 	return &LngLat{lonDeg, latDeg}
 }
 
+//Lr returns the lower right corner of the tile in decimal degrees
+func (tile *Tile) Lr() *LngLat {
+
+	n := math.Pow(2.0, float64(tile.Z))
+	lonDeg := float64(tile.X+1)/n*threeSixty - oneEighty
+	latRad := math.Atan(math.Sinh(math.Pi * float64(1-(2*float64(tile.Y+1)/n))))
+	latDeg := rad2deg(latRad)
+
+	return &LngLat{lonDeg, latDeg}
+
+}
+
 //Bounds returns a LngLatBbox for a given tile
 func (tile *Tile) Bounds() *LngLatBbox {
 	a := tile.Ul()
@@ -84,7 +97,7 @@ func (tile *Tile) Bounds() *LngLatBbox {
 	return &LngLatBbox{a.Lng, b.Lat, b.Lng, a.Lat}
 }
 
-//Parent returns the tile above (i.e. at a lower zoon number) the given tile
+//Parent returns the tile above (i.e. at a lower zoom number) the given tile
 func (tile *Tile) Parent() *Tile {
 
 	if tile.Z == 0 && tile.X == 0 && tile.Y == 0 {
@@ -183,4 +196,16 @@ func pointToFractionalTile(ll *LngLat, z int) *tileFraction {
 
 	return &tileFraction{X: x, Y: y, Z: z}
 
+}
+
+func (tile *Tile) Bounds3857() *Bbox {
+
+	bbox := Bbox{}
+	ul := ToXY(tile.Ul())
+	lr := ToXY(tile.Lr())
+	bbox.Top = ul.Y
+	bbox.Left = ul.X
+	bbox.Right = lr.X
+	bbox.Bottom = lr.Y
+	return &bbox
 }

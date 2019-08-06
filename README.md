@@ -7,6 +7,6 @@
 
 Gophertile is a port of the Mapbox [Mercantile python library](https://github.com/mapbox/mercantile) to Go.
 
-Not everything is currenly supported. 
+Not everything is currently supported. 
 
 //TODO code snippets and usage 

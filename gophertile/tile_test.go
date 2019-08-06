@@ -88,13 +88,17 @@ func assertPrettyClose(t *testing.T, x float64, y float64) {
 			//floats and shit
 			return
 		}
+		t.Logf("Expected: %v", x)
+		t.Logf("Actual: %v", y)
+		t.Logf("Difference between actual and expected is %v", x-y)
 		t.Fail()
 	}
 }
 
 func assertEq(t *testing.T, x interface{}, y interface{}) {
 	if x != y {
-
+		t.Logf("Expected: %v", x)
+		t.Logf("Actual: %v", y)
 		fmt.Printf("%v is not equal to %v", x, y)
 		t.Fail()
 	}
@@ -128,6 +132,26 @@ func TestPointToTile(t *testing.T) {
 	}
 
 }
+func TestBounds3857(t *testing.T) {
+
+	t1 := Tile{0, 0, 2}
+	correct1 := Bbox{Left: -20037508, Bottom: 10018754, Right: -10018754, Top: 20037508}
+	t2 := Tile{16, 29, 6}
+	correct2 := Bbox{-10018754, 1252344, -9392582, 1878516}
+	resBBox1 := t1.Bounds3857()
+	resBBox2 := t2.Bounds3857()
+
+	//truncating the decimals before comparing
+	assertEq(t, float64(int(resBBox1.Bottom)), correct1.Bottom)
+	assertEq(t, float64(int(resBBox2.Bottom)), correct2.Bottom)
+	assertEq(t, float64(int(resBBox1.Top)), correct1.Top)
+	assertEq(t, float64(int(resBBox2.Top)), correct2.Top)
+	assertEq(t, float64(int(resBBox1.Left)), correct1.Left)
+	assertEq(t, float64(int(resBBox2.Left)), correct2.Left)
+	assertEq(t, float64(int(resBBox1.Right)), correct1.Right)
+	assertEq(t, float64(int(resBBox2.Right)), correct2.Right)
+
+}
 
 func TestPointToFractionalTile(t *testing.T) {
 	ll := LngLat{
@@ -137,6 +161,7 @@ func TestPointToFractionalTile(t *testing.T) {
 	tf := tileFraction{X: 119.552490234375, Y: 191.47119140625, Z: 9}
 	tile := pointToFractionalTile(&ll, 9)
 	if tile.X != tf.X || tile.Y != tf.Y || tile.Z != tf.Z {
+
 		t.Fail()
 	}
 
